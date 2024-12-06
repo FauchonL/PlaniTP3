@@ -40,10 +40,8 @@ public class SAT extends AbstractPlanner {
     private double heuristicWeight;
     private StateHeuristic.Name heuristic;
     private final Map<Action, Integer> actionIds = new HashMap<>();
-    private int nextActionId = 1; // Identifiant à attribuer à la prochaine action
-    /**
-     * The class logger.
-     */
+    private int nextActionId = 1; 
+
     private static final Logger LOGGER = LogManager.getLogger(SAT.class.getName());
 
     /**
@@ -69,30 +67,21 @@ public class SAT extends AbstractPlanner {
         int actions = problem.getActions().size();
         int fluents = problem.getFluents().size();
 
-        // Log the beginning of the SAT solver
         LOGGER.info("* Starting SAT-based search \n");
 
-        // Step 1: Create a SAT solver instance
         ISolver solver = SolverFactory.newDefault();
-        solver.newVar(actions * fluents); // Estimate the number of variables
-        solver.setTimeout(60); // Set a timeout in seconds
+        solver.newVar(actions * fluents); 
+        solver.setTimeout(60);
 
-        // Step 2: Generate SAT clauses
         try {
-            // Encode initial state as SAT clauses
             encodeInitialState(problem, solver);
-
-            // Encode goal state as SAT clauses
             encodeGoalState(problem, solver);
-
-            // Encode action preconditions and effects
             encodeActions(problem, solver);
 
-            // Step 3: Solve the SAT problem
             if (solver.isSatisfiable()) {
                 LOGGER.info("* SAT search succeeded\n");
 
-                // Decode solution into a plan
+                // Décode la solution en vérifiant les préconditions et en appliquant les effets
                 Plan plan = decodeSolution(solver.model(), problem);
                 this.getStatistics().setTimeToSearch(solver.getTimeout());
                 return plan;
@@ -104,10 +93,8 @@ public class SAT extends AbstractPlanner {
             LOGGER.error("SAT problem has a contradiction!", e);
             return null;
         } catch (OutOfMemoryError e) {
-            LOGGER.error(
-                    "Problème trop grand pour la mémoire actuelle.");
-            System.err.println(
-                    "Erreur de mémoire.");
+            LOGGER.error("Problème trop grand pour la mémoire actuelle.");
+            System.err.println("Erreur de mémoire.");
             return null;
         } catch (TimeoutException e) {
             LOGGER.error("SAT solver timeout exceeded!", e);
@@ -115,78 +102,154 @@ public class SAT extends AbstractPlanner {
         }
     }
 
-    // Helper methods to encode problem into SAT and decode the solution
 
-    private void encodeInitialState(Problem problem, ISolver solver) throws ContradictionException {
-        // For each fluent in the initial state, add a clause that ensures it is true
-        BitVector initialState = problem.getInitialState().getPositiveFluents();
-        for (int i = 0; i < initialState.size(); i++) {
-            if (initialState.get(i)) { // Check if the fluent is true
-                int var = fluentToVar(i, 0,problem); // Map the fluent index to a SAT variable
-                solver.addClause(new VecInt(new int[] { var }));
-            }
-        }
-    }
 
-    private void encodeActions(Problem problem, ISolver solver) throws ContradictionException {
-        for (Action action : problem.getActions()) {
-            int actionId = getActionId(action);
-
-            // Encode les préconditions
-            if (action.getPrecondition() != null) {
-                BitVector preconditions = action.getPrecondition().getPositiveFluents();
-                for (int i = 0; i < preconditions.size(); i++) {
-                    if (preconditions.get(i)) {
-                        int var = fluentToVar(i, actionId, problem); // Map the fluent index to a SAT variable
-                        solver.addClause(new VecInt(new int[] { -actionId, var })); // action implique précondition
-                    }
+        private void encodeInitialState(Problem problem, ISolver solver) throws ContradictionException {
+            BitVector initialState = problem.getInitialState().getPositiveFluents();
+            for (int i = 0; i < initialState.size(); i++) {
+                if (initialState.get(i)) { 
+                    int var = fluentToVar(i, 0,problem); 
+                    solver.addClause(new VecInt(new int[] { var }));
                 }
             }
+        }
 
-            // Encode uniquement les effets nécessaires
-            for (ConditionalEffect condEffect : action.getConditionalEffects()) {
-                Effect effect = condEffect.getEffect();
-                BitVector positiveEffects = effect.getPositiveFluents();
-                for (int i = 0; i < positiveEffects.size(); i++) {
-                    if (positiveEffects.get(i)) {
-                        // On encode uniquement si le fluent est utilisé dans l'état final ou un
-                        // prérequis pour économiser la mémoire
-                        if (problem.getGoal().getPositiveFluents().get(i)) {
-                            int var = fluentToVar(i, actionId + 1, problem); // Map the fluent index to a SAT variable
-                            solver.addClause(new VecInt(new int[] { -actionId, var })); // action implique effet
+        private void encodeActions(Problem problem, ISolver solver) throws ContradictionException {
+            for (Action action : problem.getActions()) {
+                int actionId = getActionId(action);
+
+                if (action.getPrecondition() != null) {
+                    BitVector preconditions = action.getPrecondition().getPositiveFluents();
+                    for (int i = 0; i < preconditions.size(); i++) {
+                        if (preconditions.get(i)) {
+                            int var = fluentToVar(i, actionId, problem); 
+                            LOGGER.info("Action: " + action.getName() + " Precondition: " + problem.getFluents().get(i) + " Var: " + var + "\n");
+                            solver.addClause(new VecInt(new int[] { -actionId, var })); 
+                        }
+                    }
+                }
+
+                for (ConditionalEffect condEffect : action.getConditionalEffects()) {
+                    Effect effect = condEffect.getEffect();
+                    BitVector positiveEffects = effect.getPositiveFluents();
+                    for (int i = 0; i < positiveEffects.size(); i++) {
+                        if (positiveEffects.get(i)) {
+                            if (problem.getGoal().getPositiveFluents().get(i)) {
+                                int var = fluentToVar(i, actionId + 1, problem);
+                                solver.addClause(new VecInt(new int[] { -actionId, var })); 
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    // Encodes the goal state into SAT
-    private void encodeGoalState(Problem problem, ISolver solver) throws ContradictionException {
-        BitVector goalState = problem.getGoal().getPositiveFluents();
-        for (int i = 0; i < goalState.size(); i++) {
-            if (goalState.get(i)) {
-                int var = fluentToVar(i, Integer.MAX_VALUE,problem); // Arbitrary max horizon step
-                solver.addClause(new VecInt(new int[] { var }));
-            }
-        }
-    }
-
-    // Decodes the solution from the SAT solver
-    private Plan decodeSolution(int[] model, Problem problem) {
-        Plan plan = new SequentialPlan();
-        for (int var : model) {
-            if (var > 0) { // Positive variables indicate satisfied fluents/actions
-                Action action = getActionByVar(var);
-                if (action != null) {
-                    plan.add(0, action);
+        private void encodeGoalState(Problem problem, ISolver solver) throws ContradictionException {
+            BitVector goalState = problem.getGoal().getPositiveFluents();
+            for (int i = 0; i < goalState.size(); i++) {
+                if (goalState.get(i)) {
+                    int var = fluentToVar(i, Integer.MAX_VALUE,problem);
+                    solver.addClause(new VecInt(new int[] { var }));
                 }
             }
         }
-        return plan;
-    }
 
-    // Helper to get action by SAT variable
+        private Plan decodeSolution(int[] model, Problem problem) {
+            Plan plan = new SequentialPlan();
+            BitVector currentState = problem.getInitialState().getPositiveFluents();  // L'état initial
+        
+            for (int var : model) {
+                if (var > 0) { 
+                    // On récupère l'action associée à la variable
+                    Action action = getActionByVar(var);
+        
+                    if (action != null) {
+                        // Vérifier si les préconditions de l'action sont satisfaites dans l'état courant
+                        if (checkPreconditions(action, currentState, problem)) {
+                            // Si les préconditions sont satisfaites, ajouter l'action au plan
+                            plan.add(0, action);
+        
+                            // Appliquer les effets positifs et négatifs de l'action
+                            applyEffects(action, currentState, problem);
+                        } else {
+                            // Si les préconditions ne sont pas satisfaites, ignorer cette solution
+                            LOGGER.warn("Action {} ne respecte pas les préconditions", action.getName());
+                        }
+                    }
+                }
+            }
+            return plan;
+        }
+
+        private boolean checkPreconditions(Action action, BitVector currentState, Problem problem) {
+            if (action.getPrecondition() != null) {
+                BitVector preconditions = action.getPrecondition().getPositiveFluents();
+                for (int i = 0; i < preconditions.size(); i++) {
+                    if (preconditions.get(i) && !currentState.get(i)) {
+                        // Si une précondition est positive et non satisfaite, l'action ne peut pas être exécutée
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private void applyEffects(Action action, BitVector currentState, Problem problem) {
+            // Appliquer les effets classiques (non conditionnels)
+            for (ConditionalEffect effect : action.getConditionalEffects()) {
+                BitVector positiveEffects = effect.getEffect().getPositiveFluents();
+                for (int i = 0; i < positiveEffects.size(); i++) {
+                    if (positiveEffects.get(i)) {
+                        currentState.set(i);  // Marquer le fluent comme vrai
+                    }
+                }
+        
+                BitVector negativeEffects = effect.getEffect().getNegativeFluents();
+                for (int i = 0; i < negativeEffects.size(); i++) {
+                    if (negativeEffects.get(i)) {
+                        currentState.clear(i);  // Marquer le fluent comme faux
+                    }
+                }
+            }
+        
+            // Appliquer les effets conditionnels
+            for (ConditionalEffect conditionalEffect : action.getConditionalEffects()) {
+                // Condition de l'effet conditionnel
+                BitVector condition = conditionalEffect.getCondition().getPositiveFluents();
+                boolean conditionMet = true;
+        
+                // Vérifier si la condition est satisfaite
+                for (int i = 0; i < condition.size(); i++) {
+                    if (condition.get(i) && !currentState.get(i)) {
+                        conditionMet = false;
+                        break;
+                    }
+                }
+        
+                if (conditionMet) {
+                    // Si la condition est satisfaite, appliquer les effets de l'effet conditionnel
+                    Effect effect = conditionalEffect.getEffect();
+                    BitVector positiveEffects = effect.getPositiveFluents();
+                    for (int i = 0; i < positiveEffects.size(); i++) {
+                        if (positiveEffects.get(i)) {
+                            currentState.set(i);  // Marquer le fluent comme vrai
+                        }
+                    }
+        
+                    BitVector negativeEffects = effect.getNegativeFluents();
+                    for (int i = 0; i < negativeEffects.size(); i++) {
+                        if (negativeEffects.get(i)) {
+                            currentState.clear(i);  // Marquer le fluent comme faux
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        
+    
+
     private Action getActionByVar(int var) {
         for (Map.Entry<Action, Integer> entry : actionIds.entrySet()) {
             if (entry.getValue().equals(var)) {
@@ -196,12 +259,11 @@ public class SAT extends AbstractPlanner {
         return null;
     }
 
-    // Utility to convert fluent ID to SAT variable
     private int fluentToVar(int fluentId, int timeStep, Problem problem) {
         if (fluentId < 0 || timeStep < 0) {
             throw new IllegalArgumentException("Fluent ID must be positive");
         }
-        return 1 + (timeStep * 1500) + fluentId; // Adjust multiplier for larger problems
+        return 1 + (timeStep * 1500) + fluentId; 
     }
 
     /**

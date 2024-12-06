@@ -1,0 +1,135 @@
+BLOCKS
+SAT
+Domaine: domain.pddl, Problème: 1.pddl
+Total time:                   0,11 seconds total time
+Nombre d'actions: 8
+HSP
+Domaine: domain.pddl, Problème: 1.pddl
+Total time:                   0,06 seconds total time
+Nombre d'actions: 6
+SAT
+Domaine: domain.pddl, Problème: 2.pddl
+Total time:                   0,13 seconds total time
+Nombre d'actions: 10
+HSP
+Domaine: domain.pddl, Problème: 2.pddl
+Total time:                   0,06 seconds total time
+Nombre d'actions: 10
+SAT
+Domaine: domain.pddl, Problème: 3.pddl
+Total time:                   0,12 seconds total time
+Nombre d'actions: 8
+HSP
+Domaine: domain.pddl, Problème: 3.pddl
+Total time:                   0,05 seconds total time
+Nombre d'actions: 6
+SAT
+Domaine: domain.pddl, Problème: 4.pddl
+Total time:                   0,24 seconds total time
+Nombre d'actions: 16
+HSP
+Domaine: domain.pddl, Problème: 4.pddl
+Total time:                   0,08 seconds total time
+Nombre d'actions: 12
+SAT
+Domaine: domain.pddl, Problème: 5.pddl
+Total time:                   0,18 seconds total time
+Nombre d'actions: 14
+HSP
+Domaine: domain.pddl, Problème: 5.pddl
+Total time:                   0,06 seconds total time
+Nombre d'actions: 10
+
+LOGISTICS
+SAT
+Domaine: domain.pddl, Problème: 1.pddl
+Total time:                   0,58 seconds total time
+Nombre d'actions: 31
+HSP
+Domaine: domain.pddl, Problème: 1.pddl
+Total time:                   0,16 seconds total time
+Nombre d'actions: 20
+SAT
+Domaine: domain.pddl, Problème: 2.pddl
+Total time:                   0,70 seconds total time
+Nombre d'actions: 29
+HSP
+Domaine: domain.pddl, Problème: 2.pddl
+Total time:                   0,31 seconds total time
+Nombre d'actions: 19
+SAT
+Domaine: domain.pddl, Problème: 3.pddl
+Total time:                   0,38 seconds total time
+Nombre d'actions: 16
+HSP
+Domaine: domain.pddl, Problème: 3.pddl
+Total time:                   0,13 seconds total time
+Nombre d'actions: 15
+SAT
+Domaine: domain.pddl, Problème: 4.pddl
+Total time:                   0,97 seconds total time
+Nombre d'actions: 32
+HSP
+Domaine: domain.pddl, Problème: 4.pddl
+Total time:                   0,65 seconds total time
+Nombre d'actions: 27
+SAT
+Domaine: domain.pddl, Problème: 5.pddl
+Total time:                   1,33 seconds total time
+Nombre d'actions: 31
+HSP
+Domaine: domain.pddl, Problème: 5.pddl
+Total time:                   0,23 seconds total time
+Nombre d'actions: 17
+
+DEPOT
+SAT
+Domaine: domain.pddl, Problème: 1.pddl
+Total time:                   0,26 seconds total time
+Nombre d'actions: 14
+HSP
+Domaine: domain.pddl, Problème: 1.pddl
+Total time:                   0,10 seconds total time
+Nombre d'actions: 10
+SAT
+Domaine: domain.pddl, Problème: 2.pddl
+Total time:                   1,43 seconds total time
+Nombre d'actions: 16
+HSP
+Domaine: domain.pddl, Problème: 2.pddl
+Total time:                   0,15 seconds total time
+Nombre d'actions: 15
+
+GRIPPER
+SAT
+Domaine: domain.pddl, Problème: 1.pddl
+Total time:                   0,15 seconds total time
+Nombre d'actions: 13
+HSP
+Domaine: domain.pddl, Problème: 1.pddl
+Total time:                   0,07 seconds total time
+Nombre d'actions: 11
+SAT
+Domaine: domain.pddl, Problème: 2.pddl
+Total time:                  14,73 seconds total time
+Nombre d'actions: 25
+HSP
+Domaine: domain.pddl, Problème: 2.pddl
+Total time:                   0,21 seconds total time
+Nombre d'actions: 17
+SAT
+Domaine: domain.pddl, Problème: 3.pddl
+Total time:                  14,24 seconds total time
+Nombre d'actions: 29
+HSP
+Domaine: domain.pddl, Problème: 3.pddl
+Total time:                   0,78 seconds total time
+Nombre d'actions: 23
+SAT
+Domaine: domain.pddl, Problème: 4.pddl
+Total time:                  40,54 seconds total time
+Nombre d'actions: 29
+HSP
+Domaine: domain.pddl, Problème: 4.pddl
+Total time:                   4,79 seconds total time
+Nombre d'actions: 29
